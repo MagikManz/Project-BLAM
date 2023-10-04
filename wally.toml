@@ -5,7 +5,5 @@ registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 
 [dependencies]
-Janitor = "howmanysmall/janitor@^1.15"
-Signal = "sleitnick/signal@^1.1"
 Net = "vorlias/net@^3.0"
 t = "osyrisrblx/t@^3.0"
