@@ -12,7 +12,10 @@ local CameraTypes = require(ReplicatedStorage.Client.Types.Camera)
 
 local CharacterService = require(ReplicatedStorage.Client.Character)
 
+local Springs = require(ReplicatedStorage.Shared.Spring)
+
 local Camera = workspace.CurrentCamera
+local CameraSpring = Springs.new(CFrame.identity, 15, 0.7)
 
 local CustomCamera = { 
     Enabled = false,
@@ -31,6 +34,13 @@ local lastRecordedCF = CFrame.identity
 
 local function spawnCustomCamera()    
     currentCameraMode = CameraModes.ThirdPerson
+
+    local function runSpring()
+        CameraSpring:Run(nil, function(value)
+            Camera.CFrame = value
+        end)
+    end
+
     return RunService.PreRender:Connect(function(dt)
         if Camera.CameraType ~= Enum.CameraType.Scriptable then
             Camera.CameraType = Enum.CameraType.Scriptable
@@ -41,8 +51,11 @@ local function spawnCustomCamera()
             lastRecordedCF = character:GetPivot() 
         end
     
-        Camera.CFrame = Camera.CFrame:Lerp(currentCameraMode:Stepped(dt, if character then character:GetPivot() else lastRecordedCF), 1 / 3)
-    end)    
+        CameraSpring:SetGoal(currentCameraMode:Stepped(dt, if character then character:GetPivot() else lastRecordedCF))
+        if CameraSpring:Playing() == false then
+            runSpring()
+        end
+    end)
 end
 
 function CustomCamera:Enable()

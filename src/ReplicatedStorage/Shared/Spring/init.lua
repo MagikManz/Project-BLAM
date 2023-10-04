@@ -163,8 +163,7 @@ function SpringValue:getPositionVelocity(dt: number, current: number, velocity: 
 	return a0 * p0 + a1 * p1 + a2 * v0, b0 * p0 + b1 * p1 + b2 * v0
 end
 
-RunService:UnbindFromRenderStep("UPDATE_SPRING_VALUES")
-RunService:BindToRenderStep("UPDATE_SPRING_VALUES", Enum.RenderPriority.First.Value, function(dt: number)
+RunService.PreRender:Connect(function(dt: number)
 	for spring, resolve in pairs(SpringValues) do
 		local didUpdate = spring:Update(dt)
 		local value = spring:GetValue()
