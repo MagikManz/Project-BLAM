@@ -4,15 +4,20 @@
     Description: Camera system for "Project BLAM!"
 --]]
 
+local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
+local Inputs = require(script.Inputs)
 local CameraTypes = require(ReplicatedStorage.Client.Types.Camera)
 
 local CharacterService = require(ReplicatedStorage.Client.Character)
 
-local Springs = require(ReplicatedStorage.Shared.Spring)
+local Springs = require(ReplicatedStorage.Client.Spring)
+
+local KeysResolver = require(ReplicatedStorage.Client.Inputs.Resolver)
+
+local CameraInputs = require(script.Inputs)
 
 local Camera = workspace.CurrentCamera
 local CameraSpring = Springs.new(CFrame.identity, 15, 0.7)
@@ -65,6 +70,30 @@ function CustomCamera:Enable()
 
     self.Enabled = true
     self.CurrentConnection = spawnCustomCamera()
+    
+    Inputs.InputSettings.currentCameraMode = currentCameraMode
+    Inputs.InputSettings.cameraModes = CameraModes
+    
+    ContextActionService:BindActionAtPriority("CameraActions",function(_actionName: string, inputState: Enum.UserInputState, inputObject: InputObject) 
+        local resolvedInput = KeysResolver(inputObject)
+        if resolvedInput == nil then
+            return Enum.ContextActionResult.Pass
+        end
+
+        if inputState == Enum.UserInputState.Begin then
+            warn("Begin")
+            CameraInputs.InputBegan(resolvedInput, inputObject, false)
+        elseif inputState == Enum.UserInputState.Change then
+            local newMode = CameraInputs.InputChanged(resolvedInput, inputObject)
+            if newMode ~= nil then
+                currentCameraMode = newMode :: CameraTypes.CameraMode
+            end
+        elseif inputState == Enum.UserInputState.End or inputState == Enum.UserInputState.Cancel then
+            CameraInputs.InputEnded(resolvedInput, inputObject)
+        end
+
+        return Enum.ContextActionResult.Pass
+    end, false, Enum.ContextActionPriority.High.Value, table.unpack(CameraInputs.InputSettings.keysUsed))
 end
 
 function CustomCamera:Disable()
@@ -72,63 +101,8 @@ function CustomCamera:Disable()
 
     (self.CurrentConnection :: RBXScriptConnection):Disconnect()
     self.CurrentConnection = nil
+
+    ContextActionService:UnbindAction("CameraActions")
 end
-
--- will get removed and moved to its own module soon (just for testing)
-UserInputService.InputBegan:Connect(function(input, proce)
-    if proce then return end
-
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        local cameraSettings = currentCameraMode:GetSettings()
-        if cameraSettings.CanZoomIn == false then return end
-
-        local zoomInFactor = cameraSettings.CameraZoomInFactor
-
-        UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-        currentCameraMode:UpdateOffset(cameraSettings.CameraOffset - Vector3.zAxis * zoomInFactor)
-
-        currentCameraMode:SetRightClick(true)
-
-        return
-    end
-
-    if input.KeyCode ~= Enum.KeyCode.Q then
-        return
-    end
-
-    local cameraOffset = currentCameraMode:GetSettings().CameraOffset
-
-    currentCameraMode:UpdateOffset(cameraOffset * Vector3.new(-1, 1, 1))
-end)
-
-UserInputService.InputChanged:Connect(function(input: InputObject)
-    if input.UserInputType == Enum.UserInputType.MouseWheel then
-        if currentCameraMode:Scrolled(input.Position.Z) then
-            currentCameraMode:ResetToDefault()
-
-            if currentCameraMode.Name == "Third Person" then
-                currentCameraMode = CameraModes.FirstPerson
-            else
-                currentCameraMode = CameraModes.ThirdPerson
-            end
-
-            currentCameraMode:ResetToDefault()
-        end
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input: InputObject)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        local cameraSettings = currentCameraMode:GetSettings()
-        if cameraSettings.CanZoomIn == false or cameraSettings.RightClicking == false then return end
-
-        local zoomInFactor = cameraSettings.CameraZoomInFactor
-
-        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-        currentCameraMode:UpdateOffset(cameraSettings.CameraOffset + Vector3.zAxis * zoomInFactor)
-
-        currentCameraMode:SetRightClick(false)
-    end
-end)
 
 return CustomCamera
