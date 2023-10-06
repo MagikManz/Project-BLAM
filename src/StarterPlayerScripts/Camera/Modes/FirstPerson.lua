@@ -8,12 +8,12 @@ local CAMERA_ANGLE_X = 0
 local CAMERA_ANGLE_Y = 0
 
 local CAMERA_OFFSET = Vector3.new(0, 1, -1.5)
-local CAMERA_ZOOM_IN_FACTOR = 3
 
 local Camera : Types.CameraMode = { 
     Name = "First Person",
 
     Settings = {
+        CanFlipCamera = false,
         CanZoomIn = false,
         RightClicking = false,
 
@@ -21,25 +21,31 @@ local Camera : Types.CameraMode = {
         CameraAngleY = CAMERA_ANGLE_Y,
 
         CameraOffset = CAMERA_OFFSET,
-        CameraZoomInFactor = CAMERA_ZOOM_IN_FACTOR
+        CameraZoomInFactor = Vector3.zero
     },
 
-    UpdateOffset = function(_self: Types.CameraMode, _newOffset: Vector3) end,
-    UpdateAngleX = function(_self: Types.CameraMode, _newAngle: number) end,
-    UpdateAngleY = function(_self: Types.CameraMode, _newAngle: number) end,
+    GetOffset = function(_self) return Vector3.zero end,
 
-    SetRightClick = function(_self: Types.CameraMode, _isClicking: boolean) end,
+    UpdateOffset = function(_self, _newOffset) end,
+    UpdateAngleX = function(_self, _newAngle) end,
+    UpdateAngleY = function(_self, _newAngle) end,
 
-    GetSettings = function(_self: Types.CameraMode) return { CameraAngleX = 0, CameraAngleY = 0, CameraOffset = Vector3.zero, CameraZoomInFactor = 0, RightClicking = false, CanZoomIn = false } end,
+    SetRightClick = function(_self, _isClicking) end,
 
-    ResetToDefault = function(_self: Types.CameraMode) end,
+    GetSettings = function(_self) return { CameraAngleX = 0, CameraAngleY = 0, CameraOffset = Vector3.zero, CameraZoomInFactor = Vector3.zero, RightClicking = false, CanZoomIn = false, CanFlipCamera = false, } end,
+
+    ResetToDefault = function(_self) end,
     
-    Scrolled = function(_self: Types.CameraMode, _direction: number) return true end,
+    Scrolled = function(_self, _direction) return true end,
 
-    Stepped = function(_self: Types.CameraMode, _dt: number, _characterCFrame: CFrame) return CFrame.identity end
+    Stepped = function(_self, _dt, _characterCFrame) return CFrame.identity end
 }
 
 local zoomValue = 0
+
+function Camera:GetOffset(): Vector3
+    return self.Settings.CameraOffset
+end
 
 function Camera:UpdateOffset(newOffset: Vector3)
     self.Settings.CameraOffset = newOffset

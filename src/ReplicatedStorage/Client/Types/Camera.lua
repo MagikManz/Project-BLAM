@@ -1,4 +1,5 @@
 export type CameraSettings = {
+    CanFlipCamera: boolean,
     CanZoomIn: boolean,
     RightClicking: boolean,
 
@@ -6,7 +7,7 @@ export type CameraSettings = {
     CameraAngleY: number,
 
     CameraOffset: Vector3,
-    CameraZoomInFactor: number
+    CameraZoomInFactor: Vector3
 }
 
 export type CameraMode = {
@@ -14,6 +15,8 @@ export type CameraMode = {
 
     Settings: CameraSettings,
 
+    GetOffset: (self: CameraMode) -> Vector3,
+    
     UpdateOffset: (self: CameraMode, newOffset: Vector3) -> (),
 
     UpdateAngleX: (self: CameraMode, newAngle: number) -> (),

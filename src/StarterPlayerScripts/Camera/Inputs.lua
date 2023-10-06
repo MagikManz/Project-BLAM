@@ -28,20 +28,20 @@ function CameraInputs.InputBegan(resolvedInput: InputType.ResolvedInput, _input:
     local currentCameraMode = CameraInputs.InputSettings.currentCameraMode
     if currentCameraMode == nil then return end
 
-    if resolvedInput == Enum.UserInputType.MouseButton2 then
-        local cameraSettings = currentCameraMode:GetSettings()
+    local cameraSettings = currentCameraMode:GetSettings()
+
+    if resolvedInput == Enum.UserInputType.MouseButton2 and cameraSettings.CanZoomIn == true then
         if cameraSettings.CanZoomIn == false then return end
 
         local zoomInFactor = cameraSettings.CameraZoomInFactor
 
         UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-        currentCameraMode:UpdateOffset(cameraSettings.CameraOffset - Vector3.zAxis * zoomInFactor)
+        currentCameraMode:UpdateOffset(zoomInFactor)
 
         currentCameraMode:SetRightClick(true)
 
-    elseif resolvedInput == Enum.KeyCode.Q then
-        local cameraOffset = currentCameraMode:GetSettings().CameraOffset
-        currentCameraMode:UpdateOffset(cameraOffset * Vector3.new(-1, 1, 1))
+    elseif resolvedInput == Enum.KeyCode.Q and cameraSettings.CanFlipCamera == true then
+        currentCameraMode:UpdateOffset(currentCameraMode:GetOffset() * Vector3.new(-1, 1, 1))
     end
 end
 
@@ -84,10 +84,8 @@ function CameraInputs.InputEnded(resolvedInput: InputType.ResolvedInput, _input:
     local cameraSettings = currentCameraMode:GetSettings()
     if cameraSettings.CanZoomIn == false or cameraSettings.RightClicking == false then return end
 
-    local zoomInFactor = cameraSettings.CameraZoomInFactor
-
     UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-    currentCameraMode:UpdateOffset(cameraSettings.CameraOffset + Vector3.zAxis * zoomInFactor)
+    currentCameraMode:UpdateOffset(cameraSettings.CameraOffset)
 
     currentCameraMode:SetRightClick(false)
 end
