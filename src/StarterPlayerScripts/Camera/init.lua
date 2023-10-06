@@ -13,14 +13,11 @@ local CameraTypes = require(ReplicatedStorage.Client.Types.Camera)
 
 local CharacterService = require(ReplicatedStorage.Client.Character)
 
-local Springs = require(ReplicatedStorage.Client.Spring)
-
 local KeysResolver = require(ReplicatedStorage.Client.Inputs.Resolver)
 
 local CameraInputs = require(script.Inputs)
 
 local Camera = workspace.CurrentCamera
-local CameraSpring = Springs.new(CFrame.identity, 15, 0.7)
 
 local CustomCamera = { 
     Enabled = false,
@@ -40,12 +37,6 @@ local lastRecordedCF = CFrame.identity
 local function spawnCustomCamera()    
     currentCameraMode = CameraModes.ThirdPerson
 
-    local function runSpring()
-        CameraSpring:Run(nil, function(value)
-            Camera.CFrame = value
-        end)
-    end
-
     return RunService.PreRender:Connect(function(dt)
         if Camera.CameraType ~= Enum.CameraType.Scriptable then
             Camera.CameraType = Enum.CameraType.Scriptable
@@ -56,10 +47,7 @@ local function spawnCustomCamera()
             lastRecordedCF = character:GetPivot() 
         end
     
-        CameraSpring:SetGoal(currentCameraMode:Stepped(dt, if character then character:GetPivot() else lastRecordedCF))
-        if CameraSpring:Playing() == false then
-            runSpring()
-        end
+        Camera.CFrame = currentCameraMode:Stepped(dt, if character then character:GetPivot() else lastRecordedCF)
     end)
 end
 
@@ -80,8 +68,9 @@ function CustomCamera:Enable()
             return Enum.ContextActionResult.Pass
         end
 
+        print("hey??? resolved??!", resolvedInput.Name)
+
         if inputState == Enum.UserInputState.Begin then
-            warn("Begin")
             CameraInputs.InputBegan(resolvedInput, inputObject, false)
         elseif inputState == Enum.UserInputState.Change then
             local newMode = CameraInputs.InputChanged(resolvedInput, inputObject)

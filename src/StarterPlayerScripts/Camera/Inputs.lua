@@ -12,7 +12,7 @@ local CameraInputs: InputType.InputSystem = {
         keysUsed = { 
             Enum.KeyCode.Q, Enum.KeyCode.DPadLeft, Enum.KeyCode.ButtonL2, Enum.UserInputType.MouseButton2, 
             Enum.UserInputType.MouseButton3, Enum.KeyCode.Thumbstick2, Enum.UserInputType.MouseWheel, 
-            Enum.KeyCode.ButtonR3
+            Enum.KeyCode.ButtonR3, Enum.KeyCode.ButtonY
         }
     },
 
@@ -27,8 +27,6 @@ function CameraInputs.InputBegan(resolvedInput: InputType.ResolvedInput, _input:
 
     local currentCameraMode = CameraInputs.InputSettings.currentCameraMode
     if currentCameraMode == nil then return end
-
-    print("hey??? resolved??!", resolvedInput.Name)
 
     if resolvedInput == Enum.UserInputType.MouseButton2 then
         local cameraSettings = currentCameraMode:GetSettings()
@@ -49,8 +47,6 @@ end
 
 function CameraInputs.InputChanged(resolvedInput: InputType.ResolvedInput, input: InputObject)
     if resolvedInput ~= Enum.UserInputType.MouseWheel then return end
-
-    print("hey??? resolved??!", resolvedInput.Name)
 
     local currentCameraMode = CameraInputs.InputSettings.currentCameraMode
     if currentCameraMode == nil then return end
@@ -80,9 +76,7 @@ function CameraInputs.InputChanged(resolvedInput: InputType.ResolvedInput, input
 end
 
 function CameraInputs.InputEnded(resolvedInput: InputType.ResolvedInput, _input: InputObject)
-    if resolvedInput ~= Enum.UserInputType.MouseButton2 or resolvedInput ~= Enum.KeyCode.ButtonY then return end
-
-    print("hey??? resolved??!", resolvedInput.Name)
+    if resolvedInput ~= Enum.UserInputType.MouseButton2 and resolvedInput ~= Enum.KeyCode.ButtonY then return end
 
     local currentCameraMode = CameraInputs.InputSettings.currentCameraMode
     if currentCameraMode == nil then return end
