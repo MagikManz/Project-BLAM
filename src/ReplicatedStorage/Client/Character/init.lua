@@ -8,6 +8,7 @@ local Players = game:GetService("Players")
 
 export type CharacterService = {
     _ref: {
+        viewmodel: Model?,
         character: Model?,
         humanoid: Humanoid?
     },
@@ -20,15 +21,20 @@ export type CharacterService = {
     _updateCharacter: (self: CharacterService, newCharacter: Model) -> ()
 }
 
+local CreateViewModel = require(script.CreateViewModel)
+
 local Player = Players.LocalPlayer
 
 local Character = { 
     _ref = {
+        viewmodel = nil,
         character = nil,
         humanoid = nil        
     },
 
     GetCharacter = function(_self: CharacterService) end,
+    GetViewModel = function(_self_: CharacterService) end,
+
     GetHumanoid = function(_self: CharacterService) end,
     GetCameraComponents = function(_self: CharacterService) end,
 
@@ -47,10 +53,20 @@ function Character:_updateCharacter(newCharacter: Model)
     end
 
     self._ref.humanoid = humanoid :: Humanoid
+
+    if self._ref.viewmodel and self._ref.viewmodel.Parent ~= nil then
+        self._ref.viewmodel:Destroy()
+    end
+
+    self._ref.viewmodel = CreateViewModel(newCharacter) 
 end
 
 function Character:GetCharacter(): Model?
     return self._ref.character
+end
+
+function Character:GetViewModel(): Model?
+    return self._ref.viewmodel
 end
 
 function Character:GetHumanoid(): Humanoid?

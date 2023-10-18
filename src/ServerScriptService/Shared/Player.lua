@@ -1,3 +1,4 @@
+local PhysicsService = game:GetService("PhysicsService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
@@ -100,14 +101,24 @@ local __init = (function()
         player.CharacterAdded:Connect(function(character)
             callCharacterCallbacks(player, character)
         end)
+
+        player:LoadCharacter()
     end
 
     for _, player: Player in ipairs(Players:GetPlayers()) do
-        connectPlayerAdded(player)
+        task.spawn(connectPlayerAdded, player)
     end
 
     Players.PlayerAdded:Connect(connectPlayerAdded)
     Players.PlayerRemoving:Connect(callPlayerRemovingCallbacks)
+
+    if PhysicsService:IsCollisionGroupRegistered("ViewModel") == false then
+        PhysicsService:RegisterCollisionGroup("ViewModel")
+    end
+
+    if PhysicsService:CollisionGroupsAreCollidable("ViewModel", "Default") == true then
+        PhysicsService:CollisionGroupSetCollidable("ViewModel", "Default", false)
+    end
 
     if RunService:IsStudio() == false then
         game:BindToClose(function()
