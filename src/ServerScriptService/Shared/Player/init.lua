@@ -2,11 +2,15 @@ local PhysicsService = game:GetService("PhysicsService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
+local Character = require(script.Character)
+
 export type PlayerService = {
     OnPlayerAdded: ( self: PlayerService, callback: ( player: Player ) -> (), priority: number? ) -> (),
     OnPlayerRemoving: ( self: PlayerService, callback: ( player: Player ) -> (), priority: number? ) -> (),
 
-    OnCharacterAdded: ( self: PlayerService, callback: ( player: Player, character: Model ) -> (), priority: number? ) -> () 
+    OnCharacterAdded: ( self: PlayerService, callback: ( player: Player, character: Model ) -> (), priority: number? ) -> (),
+
+    Character: Character.CharacterService
 }
 
 local playerCallbacks: {
@@ -16,13 +20,13 @@ local playerCallbacks: {
     CharacterAdded: { { priority: number, func: (player: Player, character: Model) -> () }}
 } = { PlayerAdded = { }, PlayerRemoving = { }, CharacterAdded = {  } }
 
-local PLAYER_RESPAWN_TIME = 3
-
 local Player: PlayerService = { 
     OnPlayerAdded = function(_self, _callback, _priority) end,
     OnPlayerRemoving = function(_self, _callback, _priority) end,
 
-    OnCharacterAdded = function(_self, _callback, _priority) end
+    OnCharacterAdded = function(_self, _callback, _priority) end,
+
+    Character = Character
 }
 
 local function __SORTCALLBACKS(name: string)
@@ -94,35 +98,13 @@ end
 
 local __init = (function()
     local function connectPlayerAdded(player: Player)
-        Player:OnCharacterAdded(function(player: Player, character: Model) 
-            local humanoid = character:WaitForChild("Humanoid", 30) :: Humanoid?
-            if humanoid == nil then
-                if player.Character ~= character then
-                    return
-                end
-
-                player:Kick("Failed to get humanoid")
-                return
-            end
-
-            local healthConnection
-            healthConnection = humanoid.HealthChanged:Connect(function(newHealth)
-                if newHealth ~= 0 then return end
-
-                healthConnection:Disconnect()
-                task.wait(PLAYER_RESPAWN_TIME)
-
-                player:LoadCharacter()
-            end)
-        end, math.huge)
-
         callPlayerAddedCallbacks(player)
         
         if player.Character then
             callCharacterCallbacks(player, player.Character)
         end
 
-        player.CharacterAdded:Connect(function(character)
+        player.CharacterAppearanceLoaded:Connect(function(character)
             callCharacterCallbacks(player, character)
         end)
 
@@ -142,6 +124,10 @@ local __init = (function()
 
     if PhysicsService:CollisionGroupsAreCollidable("ViewModel", "Default") == true then
         PhysicsService:CollisionGroupSetCollidable("ViewModel", "Default", false)
+    end
+
+    for _, info in ipairs(Character.DefaultConnections) do
+        Player:OnCharacterAdded(info.func, info.priority)
     end
 
     if RunService:IsStudio() == false then
