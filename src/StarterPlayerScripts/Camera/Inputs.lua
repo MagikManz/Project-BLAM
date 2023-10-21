@@ -21,7 +21,6 @@ local CameraInputs: InputType.InputSystem = {
     InputEnded = function() end
 }
 
-
 function CameraInputs.InputBegan(resolvedInput: InputType.ResolvedInput, _input: InputObject, processed: boolean)
     if processed then return end
 
@@ -31,8 +30,6 @@ function CameraInputs.InputBegan(resolvedInput: InputType.ResolvedInput, _input:
     local cameraSettings = currentCameraMode:GetSettings()
 
     if resolvedInput == Enum.UserInputType.MouseButton2 and cameraSettings.CanZoomIn == true then
-        if cameraSettings.CanZoomIn == false then return end
-
         local zoomInFactor = cameraSettings.CameraZoomInFactor
 
         UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
