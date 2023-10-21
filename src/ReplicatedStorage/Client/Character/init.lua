@@ -6,22 +6,23 @@
 
 local Players = game:GetService("Players")
 
+local CreateViewModel = require(script.CreateViewModel)
 export type CharacterService = {
     _ref: {
-        viewmodel: Model?,
+        viewmodel: CreateViewModel.ViewModel?,
         character: Model?,
         humanoid: Humanoid?
     },
 
     GetCharacter: (self: CharacterService) -> Model?,
+    GetViewModel: (self: CharacterService) -> CreateViewModel.ViewModel?,
+
     GetHumanoid: (self: CharacterService) -> Humanoid?,
 
     GetCameraComponents: (self: CharacterService) -> (Humanoid?, BasePart?, Model?),
 
     _updateCharacter: (self: CharacterService, newCharacter: Model) -> ()
 }
-
-local CreateViewModel = require(script.CreateViewModel)
 
 local Player = Players.LocalPlayer
 
@@ -58,14 +59,14 @@ function Character:_updateCharacter(newCharacter: Model)
         self._ref.viewmodel:Destroy()
     end
 
-    self._ref.viewmodel = CreateViewModel(newCharacter) 
+    self._ref.viewmodel = CreateViewModel(newCharacter :: Model & { PrimaryPart: BasePart }) 
 end
 
 function Character:GetCharacter(): Model?
     return self._ref.character
 end
 
-function Character:GetViewModel(): Model?
+function Character:GetViewModel(): CreateViewModel.ViewModel?
     return self._ref.viewmodel
 end
 

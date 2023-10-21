@@ -1,7 +1,9 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 export type ViewModel = Model & {
     Head: BasePart,
     PrimaryPart: BasePart,
-    HumanoidRootPart: BasePart
+    HumanoidRootPart: BasePart,
+    Humanoid: Humanoid & { Animator: Animator }
 }
 
 local CHARACTER_PARTS_WHITELIST = {
@@ -18,6 +20,7 @@ local function removeUselessBodyParts(character: Model)
     for _, child in ipairs(character:GetChildren()) do
         if child:IsA("BasePart") then
             child.LocalTransparencyModifier = 1
+            child.Massless = true
             child.CollisionGroup = "ViewModel"
         end
 
@@ -34,7 +37,7 @@ local function removeUselessBodyParts(character: Model)
     end
 end
 
-return function(character: Model)
+return function(character: Model & { PrimaryPart: BasePart, Humanoid: Humanoid & { Animator: Animator } }): ViewModel
     character.Archivable = true
     
     local viewModel = character:Clone() :: ViewModel
@@ -42,10 +45,36 @@ return function(character: Model)
 
     removeUselessBodyParts(viewModel)
 
-    viewModel.Name = "ViewModel"
-    viewModel.PrimaryPart = viewModel.Head
-    viewModel.PrimaryPart.Anchored = true
-    viewModel:PivotTo(CFrame.new(0, 5, 0))
+    local viewModelAnimations = { }
 
-    viewModel.Parent = workspace
+    viewModel.Name = "ViewModel"
+    viewModel.PrimaryPart = viewModel.HumanoidRootPart
+    viewModel.PrimaryPart.Anchored = true
+
+    viewModel.Parent = ReplicatedStorage
+
+    character.Humanoid.Animator.AnimationPlayed:Connect(function(animationTrack)
+        if viewModelAnimations[animationTrack] == nil then
+            viewModelAnimations[animationTrack] = viewModel.Humanoid.Animator:LoadAnimation(animationTrack.Animation)
+            viewModelAnimations[animationTrack].Looped = animationTrack.Looped
+        end
+
+        for charTrack, viewModelTrack in pairs(viewModelAnimations) do
+            if charTrack.IsPlaying == false then
+                viewModelTrack:Stop()
+            elseif viewModelTrack.IsPlaying == false then
+                viewModelTrack:Play()
+
+                viewModelTrack.TimePosition = charTrack.TimePosition
+            end
+        end
+    end)
+
+    viewModel:GetPropertyChangedSignal("Parent"):Connect(function()
+        if viewModel.Parent ~= nil then return end
+
+        table.clear(viewModelAnimations)
+    end)
+
+    return viewModel
 end

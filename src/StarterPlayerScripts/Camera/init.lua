@@ -46,8 +46,16 @@ local function spawnCustomCamera()
         if character then
             lastRecordedCF = character:GetPivot() 
         end
-    
+
         Camera.CFrame = currentCameraMode:Stepped(dt, if character then character:GetPivot() else lastRecordedCF)
+    
+        if currentCameraMode.Name == "First Person" then
+            local viewModel = CharacterService:GetViewModel()
+            if viewModel then
+                viewModel:PivotTo(Camera.CFrame)
+            end
+        end
+
     end)
 end
 
@@ -76,6 +84,14 @@ function CustomCamera:Enable()
             local newMode = CameraInputs.InputChanged(resolvedInput, inputObject)
             if newMode ~= nil then
                 currentCameraMode = newMode :: CameraTypes.CameraMode
+                local viewModel = CharacterService:GetViewModel()
+                if viewModel then
+                    if currentCameraMode.Name == "First Person" then
+                        viewModel.Parent = Camera
+                    else
+                        viewModel.Parent = ReplicatedStorage
+                    end
+                end
             end
         elseif inputState == Enum.UserInputState.End or inputState == Enum.UserInputState.Cancel then
             CameraInputs.InputEnded(resolvedInput, inputObject)
