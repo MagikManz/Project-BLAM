@@ -133,7 +133,7 @@ local __init = (function()
     if RunService:IsStudio() == false then
         game:BindToClose(function()
             for _, player in ipairs(Players:GetPlayers()) do
-                callPlayerRemovingCallbacks(player)
+                task.spawn(callPlayerRemovingCallbacks, player)
             end
 
             task.wait(20)
