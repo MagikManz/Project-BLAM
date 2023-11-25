@@ -7,19 +7,13 @@ local InputType = require(ReplicatedStorage.Client.Types.Inputs)
 
 local CameraInputs: InputType.InputSystem = { 
     InputSettings = { 
-        currentCameraMode = nil,
-        cameraModes = nil,
         keysUsed = { 
             Enum.KeyCode.Q, Enum.KeyCode.DPadLeft, Enum.KeyCode.ButtonL2, Enum.UserInputType.MouseButton2, 
             Enum.UserInputType.MouseButton3, Enum.KeyCode.Thumbstick2, Enum.UserInputType.MouseWheel, 
             Enum.KeyCode.ButtonR3, Enum.KeyCode.ButtonY
         }
-    },
-
-    InputBegan = function() end,
-    InputChanged = function() return nil end,
-    InputEnded = function() end
-}
+    }
+} :: InputType.InputSystem
 
 function CameraInputs.InputBegan(resolvedInput: InputType.ResolvedInput, _input: InputObject, processed: boolean)
     if processed then return end

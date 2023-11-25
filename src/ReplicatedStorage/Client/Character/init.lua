@@ -26,21 +26,7 @@ export type CharacterService = {
 
 local Player = Players.LocalPlayer
 
-local Character = { 
-    _ref = {
-        viewmodel = nil,
-        character = nil,
-        humanoid = nil        
-    },
-
-    GetCharacter = function(_self: CharacterService) end,
-    GetViewModel = function(_self_: CharacterService) end,
-
-    GetHumanoid = function(_self: CharacterService) end,
-    GetCameraComponents = function(_self: CharacterService) end,
-
-    _updateCharacter = function(_self: CharacterService, _newCharacter: Model) end
-}
+local Character: CharacterService = { } :: CharacterService
 
 function Character:_updateCharacter(newCharacter: Model)
     self._ref.character = newCharacter

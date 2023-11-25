@@ -15,7 +15,7 @@ local CAMERA_OFFSET_ZOOM = CAMERA_OFFSET - Vector3.zAxis * 3
 local offsetSpring = Springs.new(CAMERA_OFFSET, 15, 0.9)
 local angleSpring = Springs.new(CAMERA_ANGLE_X, 15, 0.9)
 
-local Camera : Types.CameraMode = { 
+local Camera: Types.CameraMode = { 
     Name = "Third Person",
 
     Settings = {
@@ -28,24 +28,8 @@ local Camera : Types.CameraMode = {
 
         CameraOffset = CAMERA_OFFSET,
         CameraZoomInFactor = CAMERA_OFFSET_ZOOM
-    },
-
-    GetOffset = function(_self) return Vector3.zero end,
-
-    UpdateOffset = function(_self, _newOffset) end,
-    UpdateAngleX = function(_self, _newAngle) end,
-    UpdateAngleY = function(_self, _newAngle) end,
-
-    SetRightClick = function(_self, _isClicking) end,
-
-    GetSettings = function(_self) return { CameraAngleX = 0, CameraAngleY = 0, CameraOffset = Vector3.zero, CameraZoomInFactor = Vector3.zero, RightClicking = false, CanZoomIn = false, CanFlipCamera = false, } end,
-
-    ResetToDefault = function(_self) end,
-    
-    Scrolled = function(_self, _direction) return true end,
-
-    Stepped = function(_self, _dt, _characterCFrame) return CFrame.identity end
-}
+    }
+} :: Types.CameraMode
 
 local zoomValue = 0
 local cameraOffset = CAMERA_OFFSET
