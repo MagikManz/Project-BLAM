@@ -8,6 +8,14 @@ local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+type CameraController =  { 
+    Enabled: boolean, 
+    CurrentConnection: RBXScriptConnection?,
+
+    Enable: (self: CameraController) -> ( ),
+    Disable: (self: CameraController) -> ( )
+}
+
 local Inputs = require(script.Inputs)
 local CameraTypes = require(ReplicatedStorage.Client.Types.Camera)
 
@@ -19,10 +27,9 @@ local CameraInputs = require(script.Inputs)
 
 local Camera = workspace.CurrentCamera
 
-local CustomCamera = { 
-    Enabled = false,
-    CurrentConnection = nil,
-}
+local CustomCamera: CameraController = { 
+    Enabled = false
+} :: CameraController
 
 local CameraModes = { }
 do
@@ -34,7 +41,7 @@ end
 local currentCameraMode = CameraModes.ThirdPerson
 local lastRecordedCF = CFrame.identity
 
-local function spawnCustomCamera()    
+local function spawnCustomCamera(): RBXScriptConnection    
     currentCameraMode = CameraModes.ThirdPerson
 
     return RunService.PreRender:Connect(function(dt)
@@ -65,7 +72,7 @@ function CustomCamera:Enable()
     end
 
     self.Enabled = true
-    self.CurrentConnection = spawnCustomCamera()
+    self.CurrentConnection = spawnCustomCamera() :: RBXScriptConnection
     
     Inputs.InputSettings.currentCameraMode = currentCameraMode
     Inputs.InputSettings.cameraModes = CameraModes
@@ -75,8 +82,6 @@ function CustomCamera:Enable()
         if resolvedInput == nil then
             return Enum.ContextActionResult.Pass
         end
-
-        print("hey??? resolved??!", resolvedInput.Name)
 
         if inputState == Enum.UserInputState.Begin then
             CameraInputs.InputBegan(resolvedInput, inputObject, false)
@@ -104,7 +109,10 @@ end
 function CustomCamera:Disable()
     self.Enabled = false
 
-    (self.CurrentConnection :: RBXScriptConnection):Disconnect()
+    if self.CurrentConnection then
+        self.CurrentConnection:Disconnect()
+    end
+
     self.CurrentConnection = nil
 
     ContextActionService:UnbindAction("CameraActions")
