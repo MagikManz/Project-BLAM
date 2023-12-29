@@ -26,7 +26,9 @@ export type CharacterService = {
 
 local Player = Players.LocalPlayer
 
-local Character: CharacterService = { } :: CharacterService
+local Character: CharacterService = {
+    _ref = { }
+} :: CharacterService
 
 function Character:_updateCharacter(newCharacter: Model)
     self._ref.character = newCharacter
