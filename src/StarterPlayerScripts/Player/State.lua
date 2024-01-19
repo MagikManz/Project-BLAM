@@ -6,7 +6,10 @@
 
 --]]
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+
+local StateCache = require(ReplicatedStorage.Shared.StateCache)
 
 type Weapon = {
     Name: string,
@@ -25,23 +28,28 @@ export type PlayerStateService = {
     },
 
     CharacterState: {
-        HoldingWeapon: boolean,
+        HoldingWeapon: StateCache.State,
 
-        Sprinting: boolean,
-        Jumping: boolean,
+        Sprinting: StateCache.State,
+        Jumping: StateCache.State,
         
-        Crouching: boolean,
-        Swimming: boolean
+        Crouching: StateCache.State,
+        Swimming: StateCache.State
     },
 
-    Values : {
-        Health: number,
+    Values: {
+        Health: StateCache.State,
         MaxHealth: number,
 
-        Stamina: number,
+        Stamina: StateCache.State,
         Oxygen: number,
-    
-        Jumps: number
+
+        Jumps: StateCache.State
+    },
+
+    Data: {
+        SprintSpeed: number,
+        WalkSpeed: number
     },
 
     WeaponState: {
@@ -54,6 +62,8 @@ export type PlayerStateService = {
     CanSprint: (self: PlayerStateService) -> boolean,
     CanCrouch: (self: PlayerStateService) -> boolean,
 
+    Sprint: (self: PlayerStateService, sprinting: boolean) -> nil,
+
     ResetState: (self: PlayerStateService) -> nil
 }
 
@@ -63,23 +73,28 @@ local DEFAULT_STATE = {
     },
 
     CharacterState = {
-        HoldingWeapon = false,
+        HoldingWeapon = StateCache:CreateState("Player.HoldingWeapon", false),
 
-        Sprinting = false,
-        Jumping = false,
+        Sprinting = StateCache:CreateState("Player.Sprinting", false),
+        Jumping = StateCache:CreateState("Player.Jumping", false),
         
-        Crouching = false,
-        Swimming = false
+        Crouching = StateCache:CreateState("Player.Crouching", false),
+        Swimming = StateCache:CreateState("Player.Swimming", false)
     },
 
     Values = {
-        Health = 100,
+        Health = StateCache:CreateState("Player.Health", 100, 0),
         MaxHealth = 100,
 
-        Stamina = 100,
+        Stamina = StateCache:CreateState("Player.Stamina", 100, 0),
         Oxygen = 100,
     
-        Jumps = 1
+        Jumps = StateCache:CreateState("Player.Jumps", 1, 0, 1),
+    },
+
+    Data = {
+        SprintSpeed = 24,
+        WalkSpeed = 14
     },
 
     WeaponState = {
@@ -94,11 +109,11 @@ function PlayerState:GetPlayer(): Player
 end
 
 function PlayerState:CanJump(): boolean
-    return self.Values.Jumps > 0
+    return self.Values.Jumps:get() :: number > 0
 end
 
 function PlayerState:CanSprint(): boolean
-    return self.Values.Stamina > 0
+    return self.Values.Stamina:get() :: number > 0
 end
 
 function PlayerState:CanCrouch(): boolean
@@ -123,4 +138,4 @@ local __init = (function()
     return nil
 end)()
 
-return table.freeze(PlayerState) :: PlayerStateService
+return PlayerState :: PlayerStateService

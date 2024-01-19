@@ -15,7 +15,7 @@ type AnimateScript = LocalScript & {
 }
 
 local PLAYER_RESPAWN_TIME = 3
-local DEFAULT_WALK_SPEED = 12
+local DEFAULT_WALK_SPEED = 14
 
 local Animations = require(ReplicatedStorage.Shared.Animations).Character
 
@@ -44,7 +44,7 @@ local __init = (function()
             end
 
             humanoid.WalkSpeed = DEFAULT_WALK_SPEED
-
+            
             local healthConnection
             healthConnection = humanoid.HealthChanged:Connect(function(newHealth)
                 if newHealth ~= 0 then return end
@@ -75,7 +75,7 @@ local __init = (function()
                 track:Stop(0)
             end
 
-            animateScript.run.RunAnim.AnimationId = Animations.Survivor.Walk
+            animateScript.run.RunAnim.AnimationId = Animations.Survivor.Sprint
             animateScript.walk.WalkAnim.AnimationId = Animations.Survivor.Walk
 
             local jumpAnimation = animateScript.jump:FindFirstChildOfClass("Animation")
