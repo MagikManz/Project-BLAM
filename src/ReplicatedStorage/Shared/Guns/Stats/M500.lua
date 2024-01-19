@@ -37,24 +37,24 @@ local Animations = {
     Hip = {
         AnimationId = "rbxassetid://12170640034", 
         Looped = true,
-        Priority = Enum.AnimationPriority.Idle
+        Priority = Enum.AnimationPriority.Action
     },
 
     HipFire = {
-        AnimationId = "rbxassetid://12170641974", 
+        AnimationId = "rbxassetid://12170643299", 
         Looped = false,
         Priority = Enum.AnimationPriority.Action2
     },
-
+    
     Aim = {
         AnimationId = "rbxassetid://12170647771", 
         Looped = true,
-        Priority = Enum.AnimationPriority.Idle
+        Priority = Enum.AnimationPriority.Action
     },
 
     AimFire = {
-        AnimationId = "rbxassetid://12170648641", 
-        Looped = true,
+        AnimationId = "rbxassetid://12170649548", 
+        Looped = false,
         Priority = Enum.AnimationPriority.Action2
     },
 
@@ -114,7 +114,27 @@ local Animations = {
 }
 
 local Config: Type.Configuration = { 
-    Animations = Animations
+    Animations = Animations,
+    Stats = {
+        Damage = {
+            MaxDamage = 70,
+            MinDamage = 10
+        },
+
+        FireModes = { "Semi" },
+
+        Magazine = {
+            MagazineSize = 24,
+            SpareMagazines = 4,
+            AmmoPerShot = 6
+        },
+
+        FireRate = 1/30,
+
+        Range = 100,
+
+        BarrelOffset = CFrame.new(0.871, 0.869, -4.109),
+    }
 } :: Type.Configuration
 
 return table.freeze(Config) :: Type.Configuration

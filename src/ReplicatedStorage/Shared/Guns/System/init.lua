@@ -11,12 +11,14 @@ local Guns = ReplicatedStorage.Shared.Guns
 local BaseWeapon = require(script.BaseWeapon)
 local GunTypes = require(Guns.Type)
 
+export type Weapon = BaseWeapon.Weapon
+
 export type GunClientService = {
     GetWeaponAnimations: (self: GunClientService, weaponName: string) -> GunTypes.GunAnimations,
 
     GetWeaponConfig: (self: GunClientService, weaponName: string) -> GunTypes.Configuration,
 
-    CreateWeapon: (self: GunClientService, weaponName: string) -> (BaseWeapon.Weapon, GunTypes.GunAnimations)
+    CreateWeapon: (self: GunClientService, weaponName: string) -> (Weapon, GunTypes.GunAnimations)
 }
 
 local GunClientService: GunClientService = { } :: GunClientService
@@ -28,7 +30,7 @@ function GunClientService:GetWeaponAnimations(weaponName: string): GunTypes.GunA
 end
 
 function GunClientService:GetWeaponConfig(weaponName: string): GunTypes.Configuration
-    local weapon = Guns:FindFirstChild(weaponName)
+    local weapon = Guns.Stats:FindFirstChild(weaponName)
     assert(weapon, "Weapon " .. weaponName .. " does not exist!")
 
     local weaponConfig = require(weapon) :: GunTypes.Configuration
@@ -37,8 +39,10 @@ function GunClientService:GetWeaponConfig(weaponName: string): GunTypes.Configur
     return weaponConfig
 end
 
-function GunClientService:CreateWeapon(weaponName: string): (BaseWeapon.Weapon, GunTypes.GunAnimations)
+function GunClientService:CreateWeapon(weaponName: string): (Weapon, GunTypes.GunAnimations)
     local weaponConfig = self:GetWeaponConfig(weaponName)
+    print("weapon config", weaponConfig)
+
     local weapon = BaseWeapon.new(weaponName, weaponConfig.Stats)
 
     return weapon, weaponConfig.Animations

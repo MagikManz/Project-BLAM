@@ -5,6 +5,7 @@ type Animation = {
 }
 
 export type GunAnimations = {
+    Equip: Animation,
     Rest: Animation,
     Hip: Animation,
     HipFire: Animation,
@@ -109,7 +110,9 @@ export type GunStats = {
 
     FireRate: number,
 
-    Range: number
+    Range: number,
+
+    BarrelOffset: CFrame
 }
 
 export type Configuration = {
