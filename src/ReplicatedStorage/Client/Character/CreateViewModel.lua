@@ -46,6 +46,7 @@ return function(character: Model & { PrimaryPart: BasePart, Humanoid: Humanoid &
     removeUselessBodyParts(viewModel)
 
     local viewModelAnimations = { }
+    local currentEquippedWeapon: Tool? = nil
 
     viewModel.Name = "ViewModel"
     viewModel.PrimaryPart = viewModel.HumanoidRootPart
@@ -72,6 +73,11 @@ return function(character: Model & { PrimaryPart: BasePart, Humanoid: Humanoid &
 
     viewModel:GetPropertyChangedSignal("Parent"):Connect(function()
         if viewModel.Parent ~= nil then return end
+
+        if currentEquippedWeapon ~= nil then
+            currentEquippedWeapon:Destroy()
+            currentEquippedWeapon = nil
+        end
 
         table.clear(viewModelAnimations)
     end)
