@@ -7,7 +7,7 @@ local ZOOM_IN_TO_SWITCH = 4
 local CAMERA_ANGLE_X = 0
 local CAMERA_ANGLE_Y = 0
 
-local CAMERA_OFFSET = Vector3.new(0, 1, -1.5)
+local CAMERA_OFFSET = Vector3.new(0, 1, 0)
 
 local Camera: Types.CameraMode = { 
     Name = "First Person",
@@ -69,8 +69,8 @@ function Camera:Scrolled(direction: number): boolean
     return false
 end
 
-function Camera:Stepped(_dt: number, characterCFrame: CFrame): CFrame
-    return CFrame.new(characterCFrame.Position) * CFrame.new(self.Settings.CameraOffset)
+function Camera:Stepped(_dt: number, characterCFrame: CFrame, angleX: CFrame, angleY: CFrame): CFrame
+    return CFrame.new(characterCFrame.Position) * angleX * angleY * CFrame.new(self.Settings.CameraOffset)
 end
 
 return table.freeze(Camera) :: Types.CameraMode

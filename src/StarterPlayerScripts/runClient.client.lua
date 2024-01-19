@@ -8,7 +8,6 @@
 local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-
 local PlayerController = require(script.Parent.Player)
 
 local Camera = require(script.Parent.Camera)
@@ -16,7 +15,7 @@ local Camera = require(script.Parent.Camera)
 
 local function runClient()
     PlayerController.State:ResetState()
-    Camera:Enable()
+    Camera:Disable()
 end
 
 local function initClient()

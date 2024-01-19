@@ -30,7 +30,7 @@ export type CameraMode = {
 
     Scrolled: (self: CameraMode, direction: number) -> boolean,
 
-    Stepped: (self: CameraMode, dt: number, characterCFrame: CFrame) -> CFrame,
+    Stepped: (self: CameraMode, dt: number, characterCFrame: CFrame, angleX: CFrame, angleY: CFrame) -> CFrame,
 }
 
 return true

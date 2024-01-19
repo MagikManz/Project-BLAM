@@ -6,11 +6,13 @@
 
 local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
 type CameraController =  { 
     Enabled: boolean, 
     CurrentConnection: RBXScriptConnection?,
+    RotationConnection: RBXScriptConnection?,
 
     Enable: (self: CameraController) -> ( ),
     Disable: (self: CameraController) -> ( )
@@ -41,7 +43,9 @@ end
 local currentCameraMode = CameraModes.ThirdPerson
 local lastRecordedCF = CFrame.identity
 
-local function spawnCustomCamera(): RBXScriptConnection    
+local pitch, yaw = 0, 0
+
+local function spawnCustomCamera(): RBXScriptConnection
     currentCameraMode = CameraModes.ThirdPerson
 
     return RunService.PreRender:Connect(function(dt)
@@ -54,16 +58,39 @@ local function spawnCustomCamera(): RBXScriptConnection
             lastRecordedCF = character:GetPivot() 
         end
 
-        Camera.CFrame = currentCameraMode:Stepped(dt, if character then character:GetPivot() else lastRecordedCF)
-    
-        if currentCameraMode.Name == "First Person" then
-            local viewModel = CharacterService:GetViewModel()
-            if viewModel then
-                viewModel:PivotTo(Camera.CFrame)
-            end
+        Camera.CFrame = currentCameraMode:Stepped(dt, lastRecordedCF, CFrame.Angles(0, yaw, 0), CFrame.Angles(pitch, 0, 0))
+
+        if character and UserInputService.MouseBehavior == Enum.MouseBehavior.LockCenter then
+            local lookVector = Vector3.new(Camera.CFrame.LookVector.X,0, Camera.CFrame.LookVector.Z)
+            character:PivotTo(CFrame.new(lastRecordedCF.Position, lastRecordedCF.Position + lookVector))
+        end
+    end)
+end
+
+local function makeCharacterInvisible()
+    local character = CharacterService:GetCharacter()
+    if character == nil then return end
+
+    for _, child in ipairs(character:GetDescendants()) do
+        if child:FindFirstAncestorWhichIsA("Tool") or (child.Name:match("Hand") and child.Name ~= "Handle") or child.Name:match("Arm") then
+            continue
         end
 
-    end)
+        if child:IsA("BasePart") then
+            child.LocalTransparencyModifier = 1
+        end
+    end
+end
+
+local function makeCharacterVisible()
+    local character = CharacterService:GetCharacter()
+    if character == nil then return end
+
+    for _, child in ipairs(character:GetDescendants()) do
+        if child:IsA("BasePart") then
+            child.LocalTransparencyModifier = 0
+        end            
+    end
 end
 
 function CustomCamera:Enable()
@@ -72,8 +99,8 @@ function CustomCamera:Enable()
     end
 
     self.Enabled = true
-    self.CurrentConnection = spawnCustomCamera() :: RBXScriptConnection
-    
+    self.CurrentConnection = spawnCustomCamera()
+
     Inputs.InputSettings.currentCameraMode = currentCameraMode
     Inputs.InputSettings.cameraModes = CameraModes
     
@@ -92,9 +119,11 @@ function CustomCamera:Enable()
                 local viewModel = CharacterService:GetViewModel()
                 if viewModel then
                     if currentCameraMode.Name == "First Person" then
-                        viewModel.Parent = Camera
+                        UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+                        makeCharacterInvisible()
                     else
-                        viewModel.Parent = ReplicatedStorage
+                        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+                        makeCharacterVisible()
                     end
                 end
             end
@@ -113,9 +142,30 @@ function CustomCamera:Disable()
         self.CurrentConnection:Disconnect()
     end
 
+    UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+
     self.CurrentConnection = nil
 
     ContextActionService:UnbindAction("CameraActions")
+
+    Camera.CameraType = Enum.CameraType.Custom
 end
+
+local __init = (function()
+    local mouseSensitivity = 1 / 600
+
+    ContextActionService:BindActionAtPriority("CameraRotation",function(_actionName: string, inputState: Enum.UserInputState, inputObject: InputObject) 
+        if inputState == Enum.UserInputState.Change then
+            local mouseDelta = inputObject.Delta * mouseSensitivity
+
+            pitch = math.clamp(pitch - mouseDelta.Y, -math.pi / 4, math.pi / 4)
+            yaw = yaw - mouseDelta.X
+        end
+
+        return Enum.ContextActionResult.Pass
+    end, false, Enum.ContextActionPriority.High.Value, Enum.UserInputType.MouseMovement)
+
+    return nil
+end)()
 
 return CustomCamera

@@ -10,7 +10,7 @@ local CAMERA_ANGLE_X = 12
 local CAMERA_ANGLE_Y = 12
 
 local CAMERA_OFFSET = Vector3.new(3, 5, 10)
-local CAMERA_OFFSET_ZOOM = CAMERA_OFFSET - Vector3.zAxis * 3
+local CAMERA_OFFSET_ZOOM = CAMERA_OFFSET - Vector3.new(-0.75, 1.5, 7.5)
 
 local offsetSpring = Springs.new(CAMERA_OFFSET, 15, 0.9)
 local angleSpring = Springs.new(CAMERA_ANGLE_X, 15, 0.9)
@@ -94,8 +94,15 @@ function Camera:Scrolled(direction: number): boolean
     return false
 end
 
-function Camera:Stepped(_dt: number, characterCFrame: CFrame): CFrame
-    return CFrame.new(characterCFrame.Position) * CFrame.new(cameraOffset) * CFrame.fromAxisAngle(-Vector3.xAxis, math.rad(cameraAngleX))
+--[[
+function Camera:Stepped(_dt: number, characterCFrame: CFrame, angleX: CFrame, angleY: CFrame): CFrame
+    local angledCFrame = CFrame.new(characterCFrame.Position) * angleX * angleY
+    return currentCamera.CFrame:Lerp(angledCFrame, 0.2) * CFrame.new(cameraOffset) * CFrame.fromAxisAngle(-Vector3.xAxis, math.rad(cameraAngleX))
+end
+]]
+
+function Camera:Stepped(_dt: number, characterCFrame: CFrame, angleX: CFrame, angleY: CFrame): CFrame
+    return CFrame.new(characterCFrame.Position) * angleX * angleY * CFrame.new(cameraOffset) * CFrame.fromAxisAngle(-Vector3.xAxis, math.rad(cameraAngleX))
 end
 
 return table.freeze(Camera) :: Types.CameraMode
