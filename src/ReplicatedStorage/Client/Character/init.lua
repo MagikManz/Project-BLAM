@@ -14,6 +14,8 @@ export type CharacterService = {
         humanoid: Humanoid?
     },
 
+    Callbacks: { [string]: (self: CharacterService, newCharacter: Model) -> () },
+
     GetCharacter: (self: CharacterService) -> Model?,
     GetViewModel: (self: CharacterService) -> CreateViewModel.ViewModel?,
 
@@ -21,13 +23,16 @@ export type CharacterService = {
 
     GetCameraComponents: (self: CharacterService) -> (Humanoid?, BasePart?, Model?),
 
+    AddCallback: (self: CharacterService, name: string, callback: (self: CharacterService, newCharacter: Model) -> ()) -> () -> (),
+
     _updateCharacter: (self: CharacterService, newCharacter: Model) -> ()
 }
 
 local Player = Players.LocalPlayer
 
 local Character: CharacterService = {
-    _ref = { }
+    _ref = { },
+    Callbacks = { }
 } :: CharacterService
 
 function Character:_updateCharacter(newCharacter: Model)
@@ -48,6 +53,10 @@ function Character:_updateCharacter(newCharacter: Model)
     end
 
     self._ref.viewmodel = CreateViewModel(newCharacter :: Model & { PrimaryPart: BasePart }) 
+
+    for _, callback in pairs(self.Callbacks) do
+        task.defer(callback, self, newCharacter)
+    end
 end
 
 function Character:GetCharacter(): Model?
@@ -69,6 +78,19 @@ function Character:GetCameraComponents(): (Humanoid?, BasePart?, Model?)
     end
 
     return self:GetHumanoid(), character:FindFirstChild("HumanoidRootPart") :: BasePart?, character
+end
+
+function Character:AddCallback(name: string, callback: (self: CharacterService, newCharacter: Model) -> ()): () -> ()
+    self.Callbacks[name] = callback
+
+    local character = self:GetCharacter()
+    if character then
+        task.defer(callback, self, character)
+    end
+
+    return function()
+        self.Callbacks[name] = nil
+    end
 end
 
 Player.CharacterAdded:Connect(function(newCharacter)
