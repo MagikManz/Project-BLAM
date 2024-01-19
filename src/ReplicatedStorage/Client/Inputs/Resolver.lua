@@ -5,7 +5,9 @@ local MAPPED_KEYS: { { Enum.KeyCode | Enum.UserInputType | Enum.UserInputState }
     { Enum.KeyCode.ButtonR3 }, 
     { Enum.UserInputType.MouseButton1, Enum.KeyCode.ButtonR2 },
     { Enum.UserInputType.MouseButton2, Enum.KeyCode.ButtonL2 },
-    { Enum.UserInputType.MouseWheel, Enum.KeyCode.Thumbstick2 }
+    { Enum.UserInputType.MouseWheel, Enum.KeyCode.Thumbstick2 },
+
+    { Enum.KeyCode.LeftShift, Enum.KeyCode.ButtonL3 }
 }
 
 return function(inputObject: InputObject): (Enum.KeyCode | Enum.UserInputType | Enum.UserInputState)?
