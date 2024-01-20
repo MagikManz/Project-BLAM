@@ -26,11 +26,6 @@ CharacterService:AddCallback("Health.UI", function(characterService)
     local healthText: TextLabel = Helpers.WaitForTaggedObject("UI_CLIENT_HEALTH_TEXT", PlayerGui) :: TextLabel
     local healthBar: Frame = Helpers.WaitForTaggedObject("UI_CLIENT_HEALTH_BAR", PlayerGui) :: Frame
 
-    local healthDownBar: Frame = Helpers.WaitForTaggedObject("UI_CLIENT_HEALTHDOWN_BAR", PlayerGui) :: Frame
-    local healthDownBarImage: ImageLabel = Helpers.WaitForTaggedObject("UI_CLIENT_HEALTHDOWN_BAR_IMAGE", healthDownBar) :: ImageLabel
-
-    local currentHealthDownTask: thread?
-
     local function onHealthChanged(playerHealth: number)
         local maxHealth = humanoid.MaxHealth
 
@@ -39,17 +34,6 @@ CharacterService:AddCallback("Health.UI", function(characterService)
         healthText.Text = tostring(playerHealth)
 
         healthBar:TweenSize(UDim2.fromScale(healthPercentage, 1), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.25, true)
-        
-        if currentHealthDownTask and coroutine.status(currentHealthDownTask) == "suspended" then
-            task.cancel(currentHealthDownTask)
-        end
-
-        currentHealthDownTask = task.delay(0.5, function()
-            healthDownBar:TweenSize(UDim2.fromScale(healthPercentage, 1), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.25, true)
-            healthDownBarImage:TweenSize(UDim2.fromScale(1 / healthPercentage, 1), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.25, true)
-
-            currentHealthDownTask = nil
-        end)
     end
 
     humanoid.HealthChanged:Connect(onHealthChanged)
