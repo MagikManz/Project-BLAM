@@ -15,6 +15,7 @@ export type CharacterService = {
     },
 
     Callbacks: { [string]: (self: CharacterService, newCharacter: Model) -> () },
+    GlobalCallbacks: { [string]: (self: CharacterService, newCharacter: Model) -> () },
 
     GetCharacter: (self: CharacterService) -> Model?,
     GetViewModel: (self: CharacterService) -> CreateViewModel.ViewModel?,
@@ -24,6 +25,7 @@ export type CharacterService = {
     GetCameraComponents: (self: CharacterService) -> (Humanoid?, BasePart?, Model?),
 
     AddCallback: (self: CharacterService, name: string, callback: (self: CharacterService, newCharacter: Model) -> ()) -> () -> (),
+    AddGlobalCallback: (self: CharacterService, name: string, callback: (self: CharacterService, newCharacter: Model) -> ()) -> () -> (),
 
     _updateCharacter: (self: CharacterService, newCharacter: Model) -> ()
 }
@@ -93,8 +95,54 @@ function Character:AddCallback(name: string, callback: (self: CharacterService, 
     end
 end
 
-Player.CharacterAdded:Connect(function(newCharacter)
-    Character:_updateCharacter(newCharacter)
-end)
+function Character:AddGlobalCallback(name: string, callback: (self: CharacterService, newCharacter: Model) -> ()): () -> ()
+    self.GlobalCallbacks[name] = callback
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        local character = player.Character
+        if character then
+            task.defer(callback, self, character)
+        end
+    end
+
+    return function()
+        self.GlobalCallbacks[name] = nil
+    end
+end
+
+
+
+
+local __init = (function()
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player == Player then continue end
+
+        local character = player.Character
+        if not character then continue end
+
+        for _, callback in pairs(Character.GlobalCallbacks) do
+            task.defer(callback, Character, character)
+        end
+    end
+
+    Player.CharacterAdded:Connect(function(newCharacter)
+        Character:_updateCharacter(newCharacter)
+    end)
+    
+    Players.PlayerAdded:Connect(function(player)
+        if player == Player then
+            return
+        end
+    
+        player.CharacterAdded:Connect(function(newCharacter)
+            for _, callback in pairs(Character.GlobalCallbacks) do
+                task.defer(callback, Character, newCharacter)
+            end
+        end)
+    end)
+
+    return nil
+end)()
 
 return table.freeze(Character) :: CharacterService
