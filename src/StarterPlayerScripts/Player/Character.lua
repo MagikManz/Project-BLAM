@@ -44,9 +44,14 @@ CharacterService:AddCallback("Player.LookAt", function(_characterService, charac
     IKControl.EndEffector = Head
 
     local function updateLookAt()
-        LookVectorPart:PivotTo(Head:GetPivot() + Vector3.yAxis * 3 + currentLookVector * 10)
+        LookVectorPart:PivotTo(CFrame.new(Head.Position + Vector3.yAxis * 3 + currentLookVector * 10))
+
+        if character.Parent ~= nil then
+            task.wait()
+            updateLookAt()
+        end
     end
-    
+
     Camera:GetPropertyChangedSignal("CFrame"):Connect(function()
         if Camera.CFrame.LookVector:Dot(currentLookVector) > 0.99 then
             return
@@ -61,8 +66,6 @@ CharacterService:AddCallback("Player.LookAt", function(_characterService, charac
 
                 currentLookVector = queuedLookVector
                 queuedLookVector = nil
-
-                updateLookAt()
             end)
 
             return
@@ -72,9 +75,9 @@ CharacterService:AddCallback("Player.LookAt", function(_characterService, charac
 
         currentLookVector = Camera.CFrame.LookVector
         queuedLookVector = nil
-
-        updateLookAt()
     end)
+
+    updateLookAt()
 end)
 
 return Character
