@@ -14,5 +14,16 @@ return Net.CreateDefinitions({
         })
     }),
 
-    ["Character.LookAt.Changed"] = Net.Definitions.ServerToClientEvent()
+    ["Character.LookAt.Changed"] = Net.Definitions.ServerToClientEvent(),
+
+    ["Weapons.Player.Shoot"] = Net.Definitions.ClientToServerEvent({
+        Net.Middleware.TypeChecking(t.CFrame),
+    }),
+
+    ["Weapons.Player.Reload"] = Net.Definitions.ClientToServerEvent({
+        Net.Middleware.TypeChecking(t.string), -- Weapon name
+        Net.Middleware.TypeChecking(t.number) -- Reload tick
+    }),
+
+    ["Weapons.Server.Projectile"] = Net.Definitions.ServerToClientEvent()
 })
