@@ -11,8 +11,8 @@ export type GunUtilities = {
 local Utilites: GunUtilities = { } :: GunUtilities
 
 function Utilites:GetWeaponStatsByName(name: string): WeaponTypes.GunStats?
-    local weaponStat: ModuleScript = WeaponsStats:FindFirstChild(name) :: ModuleScript
-    return if weaponStat then require(weaponStat) else nil
+    local weaponStat = WeaponsStats:FindFirstChild(name) :: ModuleScript
+    return if weaponStat then require(weaponStat) :: WeaponTypes.GunStats? else nil
 end
 
 return table.freeze(Utilites) :: GunUtilities

@@ -17,6 +17,7 @@ return Net.CreateDefinitions({
     ["Character.LookAt.Changed"] = Net.Definitions.ServerToClientEvent(),
 
     ["Weapons.Player.Shoot"] = Net.Definitions.ClientToServerEvent({
+        Net.Middleware.TypeChecking(t.string),
         Net.Middleware.TypeChecking(t.CFrame),
     }),
 

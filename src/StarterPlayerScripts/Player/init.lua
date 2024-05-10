@@ -50,15 +50,6 @@ end
 local function connectWeaponEvents(tool: Tool, weapon: WeaponService.Weapon)
     loadWeaponAnimations(tool, weapon)
 
-    local equipMotor: Motor6D = tool:WaitForChild("EquipMotor") :: Motor6D
-
-    local playerCharacter = CharacterService:GetCharacter()
-    if playerCharacter == nil then return end
-
-    local characterWeldPart: BasePart? = playerCharacter:WaitForChild(equipMotor:GetAttribute("Part_Name"), 50) :: BasePart?
-    if characterWeldPart == nil then return end
-
-    equipMotor.Part0 = characterWeldPart
 
     tool.Equipped:Connect(function()
         Globals:UpdateGlobal("EquippedWeapon", weapon)

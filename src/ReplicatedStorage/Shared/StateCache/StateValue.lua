@@ -4,11 +4,11 @@ export type StateValues = {
     
     name: string,
 
-    default: number | string | boolean,
-    value: number | string | boolean,
+    default: number | string | boolean | { [any]: any },
+    value: number | string | boolean | { [any]: any },
 
     connections: {
-        [string]: (value: number & string & boolean) -> nil,
+        [string]: (value: number & string & boolean & { [any]: any }) -> nil,
     }
 }
 
@@ -17,10 +17,11 @@ export type BaseState = {
 
     new: ((stateName: string, defaultValue: number, minValue: number?, maxValue: number?) -> State)
             & ((stateName: string, defaultValue: string) -> State) 
-            & ((stateName: string, defaultValue: boolean) -> State),
+            & ((stateName: string, defaultValue: boolean) -> State)
+            & ((stateName: string, defaultValue: { [any]: any }) -> State),
 
-    set: (self: State, value: number | string | boolean) -> nil,
-    get: (self: State) -> number & string & boolean,
+    set: (self: State, value: number | string | boolean | { [any]: any }) -> nil,
+    get: (self: State) -> number & string & boolean & { [any]: any },
 
     reset: (self: State) -> nil,
 
@@ -33,6 +34,20 @@ export type State = typeof(setmetatable({} :: StateValues, {} :: BaseState))
 local StateValue: BaseState = { } :: BaseState
 StateValue.__index = StateValue
 
+local function deepCopy(t: {[any]: any})
+    local copy = { }
+
+    for key, value in pairs(t) do
+        if type(value) == "table" then
+            copy[key] = deepCopy(value)
+        else
+            copy[key] = value
+        end
+    end
+
+    return copy
+end
+
 local function callConnections(self: State, value: number & string & boolean)
     for _, callback in pairs(self.connections) do
         callback(value)
@@ -41,7 +56,7 @@ local function callConnections(self: State, value: number & string & boolean)
     return nil
 end
 
-function StateValue.new(stateName: string, defaultValue: number | string | boolean, minValue: number?, maxValue: number?): State
+function StateValue.new(stateName: string, defaultValue: number | string | boolean | { [any]: any }, minValue: number?, maxValue: number?): State
     local state: StateValues = { 
         name = stateName,
         default = defaultValue,
@@ -59,7 +74,7 @@ function StateValue:get()
     return self.value :: number & string & boolean
 end
 
-function StateValue:set(value: number | string | boolean)
+function StateValue:set(value: number | string | boolean | { [any]: any })
 
     if type(value) == "number" then
         if self.minValue and value < self.minValue then
@@ -67,11 +82,13 @@ function StateValue:set(value: number | string | boolean)
         elseif self.maxValue and value > self.maxValue then
             value = self.maxValue
         end
+    elseif type(value) == "table" then
+        value = deepCopy(value)
     end
 
-    self.value = value :: number | string | boolean
+    self.value = value :: number | string | boolean | { [any]: any }
 
-    callConnections(self, self.value :: number & string & boolean)
+    callConnections(self, self.value :: number & string & boolean & { [any]: any })
 
     return nil
 end
@@ -82,7 +99,7 @@ function StateValue:reset()
     return nil
 end
 
-function StateValue:connect(connectionName: string, callback: (value: number & string & boolean) -> nil)
+function StateValue:connect(connectionName: string, callback: (value: number & string & boolean & { [any]: any }) -> nil)
     assert(type(connectionName) == "string", "connectionName must be a string")
     assert(type(callback) == "function", "callback must be a function")
 
@@ -90,7 +107,7 @@ function StateValue:connect(connectionName: string, callback: (value: number & s
 
     self.connections[connectionName] = callback
 
-    task.defer(callback, self.value :: number & string & boolean)
+    task.defer(callback, self.value :: number & string & boolean & { [any]: any })
 
     return nil
 end

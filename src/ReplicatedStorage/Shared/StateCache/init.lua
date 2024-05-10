@@ -7,7 +7,7 @@ export type StateCache = {
     _states: { StateValue.State },
 
     GetState: (self: StateCache, stateName: string) -> StateValue.State?,
-    CreateState: (self: StateCache, stateName: string, defaultValue: number | string | boolean, minValue: number?, maxValue: number?) -> StateValue.State
+    CreateState: (self: StateCache, stateName: string, defaultValue: number | string | boolean | { [any]: any }, minValue: number?, maxValue: number?) -> StateValue.State
 }
 
 local StateCache: StateCache = { 
@@ -24,8 +24,8 @@ function StateCache:GetState(stateName: string): StateValue.State?
     return nil
 end
 
-function StateCache:CreateState(stateName: string, defaultValue: number | string | boolean, minValue: number?, maxValue: number?): StateValue.State
-    local state = StateValue.new(stateName, defaultValue :: number & string & boolean, minValue, maxValue)
+function StateCache:CreateState(stateName: string, defaultValue: number | string | boolean | {[any]: any}, minValue: number?, maxValue: number?): StateValue.State
+    local state = StateValue.new(stateName, defaultValue :: number & string & boolean & {[any]: any}, minValue, maxValue)
     table.insert(self._states, state)
 
     return state
